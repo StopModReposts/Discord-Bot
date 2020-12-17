@@ -92,15 +92,28 @@ async def submit(ctx, url: str, *, args=None):
         await ctx.send("Please only submit the Domain without http:// or https://.")
     else:
         check = checklist(url)
-        if check == False:
+        if check is False:
             num = createissue("New site to add: "+url, args+" *Automated Issue*", ["addition"])
             link = "https://github.com/StopModReposts/Illegal-Mod-Sites/issues/" + str(num)
             await ctx.send("Your report for **{0}** has been received. I've created a GitHub issue (#{1} - <{2}>) where you can track the progress of your request. ".format(url, num, link))
-        elif check == True:
+        elif check is True:
             await ctx.send("**{0}** is already on our lists.".format(url))
         else:
             await ctx.send("Error with your request - {0}".format(check))
-    
+
+
+@bot.command(description="Check if a website is already on our lists", help="Check if a website is already on our lists")
+async def check(ctx, url: str):
+    if "http" in url:
+        await ctx.send("Please only submit the Domain without http:// or https://.")
+    else:
+        check = checklist(url)
+        if check is False:
+            await ctx.send(":x: **{0}** is not on our list.".format(url))
+        elif check is True:
+            await ctx.send(":white_check_mark: **{0}** is on our list.".format(url))
+        else:
+            await ctx.send("Error with your request - {0}".format(check))
 
 # Run bot
 bot.run(DISCORD_TOKEN)
