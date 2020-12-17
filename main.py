@@ -59,6 +59,19 @@ def createissue(title, body=None, labels=None):
         print ('Response:', r.content)
         return 0
 
+def checkissue(num):
+    url = 'https://api.github.com/repos/StopModReposts/Illegal-Mod-Sites/issues/{0}'.format(num)
+    r = requests.get(url)
+
+    if r.status_code == 200:
+        print ('Successfully fetched Issue {0}'.format(num))
+        jsondata = json.loads(r.text)
+        return r.status_code, jsondata.get("state"), jsondata.get("title")
+    else:
+        print ('Could not create Issue {0}'.format(num))
+        print ('Response:', r.content)
+        return r.status_code, "N/A", "N/A"
+
 
 # Bot commands
 @bot.event
@@ -114,6 +127,16 @@ async def check(ctx, url: str):
             await ctx.send(":white_check_mark: **{0}** is on our list.".format(url))
         else:
             await ctx.send("Error with your request - {0}".format(check))
+
+
+@bot.command(description="Check the status of a GitHub issue", help="Check the status of a GitHub issue")
+async def status(ctx, num: int):
+    code, status, title = checkissue(num)
+    if code == 200:
+        await ctx.send("Issue #{0} ({1}) - Status: {2}".format(num, title, status))
+    else:
+        await ctx.send("Error with your request - Status code: {0}".format(code))
+
 
 # Run bot
 bot.run(DISCORD_TOKEN)
