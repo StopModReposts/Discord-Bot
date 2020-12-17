@@ -52,7 +52,6 @@ def createissue(title, body=None, labels=None):
     if r.status_code == 201:
         print ('Successfully created Issue {0}'.format(title))
         jsondata = json.loads(r.text)
-        print(jsondata.get("number"))
         return jsondata.get("number")
     else:
         print ('Could not create Issue {0}'.format(title))
@@ -106,9 +105,9 @@ async def submit(ctx, url: str, *, args=None):
     else:
         check = checklist(url)
         if check is False:
-            num = createissue("New site to add: "+url, args+" *Automated Issue*", ["addition"])
+            num = createissue("New site to add: "+url, args+" *Automated Issue - submitted by "+str(ctx.author)+"*", ["addition"])
             link = "https://github.com/StopModReposts/Illegal-Mod-Sites/issues/" + str(num)
-            await ctx.send("Your report for **{0}** has been received. I've created a GitHub issue (#{1} - <{2}>) where you can track the progress of your request. ".format(url, num, link))
+            await ctx.send("Your report for **{0}** has been received. I've created a GitHub issue (#{1} - <{2}>) where you can track the progress of your request. You can also use `/status [issuenumber]` to get the status of your request.".format(url, num, link))
         elif check is True:
             await ctx.send("**{0}** is already on our lists.".format(url))
         else:
