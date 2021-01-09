@@ -4,6 +4,7 @@ from dotenv import load_dotenv
 import os
 import requests
 import json
+import sentry_sdk
 
 
 # Basic setup
@@ -15,6 +16,11 @@ DISCORD_TOKEN = os.getenv("DISCORD_TOKEN")
 
 GITHUB_USER = "smr-bot"
 GITHUB_TOKEN = os.getenv("GITHUB_TOKEN")
+
+sentry_sdk.init(
+    "https://f6ae76c36eec4b6ab34ac46cba61d358@o309026.ingest.sentry.io/5583030",
+    traces_sample_rate=1.0
+)
 
 
 # Bot functions
@@ -33,7 +39,6 @@ def checklist(url):
     else:
         errormsg = "REQUEST FAILED WITH STATUS CODE " + str(r.status_code)
         return errormsg
-
 
 def createissue(title, body=None, labels=None):
     '''Create an issue on github.com using the given parameters.'''
