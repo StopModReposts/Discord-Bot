@@ -16,17 +16,8 @@ slash = SlashCommand(bot, sync_commands=True)
 # 785935453719101450 TESTING
 guild_ids = [463457129588850699]
 
-
-import sentry_sdk
-sentry_sdk.init(
-    "https://f6ae76c36eec4b6ab34ac46cba61d358@o309026.ingest.sentry.io/5583030",
-    traces_sample_rate=1.0
-)
-
-
 load_dotenv()
 DISCORD_TOKEN = os.getenv("DISCORD_TOKEN")
-
 GITHUB_USER = "smr-bot"
 GITHUB_TOKEN = os.getenv("GITHUB_TOKEN")
 
