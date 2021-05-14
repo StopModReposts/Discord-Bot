@@ -1,15 +1,27 @@
 import discord
 from discord.ext import commands
+from discord_slash import SlashCommand
 from dotenv import load_dotenv
 import os
 import requests
 import json
 import sentry_sdk
+import re
 
 
 # Basic setup
 description = "Official StopModReposts bot"
-bot = commands.Bot(command_prefix='/', description=description)
+bot = commands.Bot(command_prefix='/', description=description, intents=discord.Intents.all())
+slash = SlashCommand(bot, sync_commands=True)
+guild_ids = [785935453719101450]
+
+
+import sentry_sdk
+sentry_sdk.init(
+    "https://f6ae76c36eec4b6ab34ac46cba61d358@o309026.ingest.sentry.io/5583030",
+    traces_sample_rate=1.0
+)
+
 
 load_dotenv()
 DISCORD_TOKEN = os.getenv("DISCORD_TOKEN")
@@ -42,9 +54,7 @@ def checklist(url):
 
 def createissue(title, body=None, labels=None):
     '''Create an issue on github.com using the given parameters.'''
-    # Our url to create issues via POST
     url = 'https://api.github.com/repos/StopModReposts/Illegal-Mod-Sites/issues'
-    # Create an authenticated session to create the issue
     session = requests.Session()
     session.auth = (GITHUB_USER, GITHUB_TOKEN)
     # Create our issue
@@ -55,12 +65,9 @@ def createissue(title, body=None, labels=None):
     # Add the issue to our repository
     r = session.post(url, json.dumps(issue), headers)
     if r.status_code == 201:
-        print ('Successfully created Issue {0}'.format(title))
         jsondata = json.loads(r.text)
         return jsondata.get("number")
     else:
-        print ('Could not create Issue {0}'.format(title))
-        print ('Response:', r.content)
         return 0
 
 def checkissue(num):
@@ -68,12 +75,9 @@ def checkissue(num):
     r = requests.get(url)
 
     if r.status_code == 200:
-        print ('Successfully fetched Issue {0}'.format(num))
         jsondata = json.loads(r.text)
         return r.status_code, jsondata.get("state"), jsondata.get("title")
     else:
-        print ('Could not create Issue {0}'.format(num))
-        print ('Response:', r.content)
         return r.status_code, "N/A", "N/A"
 
 
@@ -96,48 +100,64 @@ async def on_ready():
   print("Bot is in " + str(guild_count) + " guilds")
     
 
-@bot.command(description="Test command which returns ping time", help="Test command which returns ping time")
+@slash.slash(name="ping", description="Test command which returns the bot's ping", guild_ids=guild_ids)
 async def ping(ctx):
   await ctx.send("Pong! Bot latency: {0}".format(bot.latency))
     
 
-@bot.command(description="Submit a URL for review", help="Submit a URL for review")
-async def submit(ctx, url: str, *, args=None):
-    if args == None:
+@slash.slash(name="submit", description="Submit a URL for review", guild_ids=guild_ids)
+async def submit(ctx, url: str, description: str):
+    url = re.search("([a-z0-9A-Z]\.)*[a-z0-9-]+\.([a-z0-9]{2,24})+(\.co\.([a-z0-9]{2,24})|\.([a-z0-9]{2,24}))*", url).group(0)
+    if description == None:
         await ctx.send("Please add a description after the URL.")
-    elif "http" in url:
-        await ctx.send("Please only submit the Domain without http:// or https://.")
     else:
         check = checklist(url)
         if check is False:
-            num = createissue("New site to add: "+url, args+" *Automated Issue - submitted by "+str(ctx.author)+"*", ["addition"])
+            num = createissue("New site to add: "+url, description+" *Automated Issue - submitted by "+str(ctx.author)+"*", ["addition"])
             link = "https://github.com/StopModReposts/Illegal-Mod-Sites/issues/" + str(num)
-            await ctx.send("Your report for **{0}** has been received. I've created a GitHub issue (#{1} - <{2}>) where you can track the progress of your request. You can also use `/status [issuenumber]` to get the status of your request.".format(url, num, link))
+            embed=discord.Embed(title="Click here to view your issue", url=link, description="I've created a GitHub issue where you can track the progress of your request. You can also use `/status [issuenumber]` to get the status of your request.", color=0x00ff80)
+            embed.set_author(name="Thanks for your report!")
+            embed.add_field(name="Site", value=url, inline=True)
+            embed.add_field(name="Issue Number", value=num, inline=True)
+            embed.add_field(name="Description", value=description, inline=False)
+            embed.set_footer(text="Submitted by {0}".format(ctx.author))
+            await ctx.send(embed=embed)
         elif check is True:
             await ctx.send("**{0}** is already on our lists.".format(url))
         else:
             await ctx.send("Error with your request - {0}".format(check))
 
 
-@bot.command(description="Check if a website is already on our lists", help="Check if a website is already on our lists")
-async def check(ctx, url: str):
-    if "http" in url:
-        await ctx.send("Please only submit the Domain without http:// or https://.")
+@slash.slash(name="check", description="Check if a website is already on our lists", guild_ids=guild_ids)
+async def check(ctx, url: str):    
+    url = re.search("([a-z0-9A-Z]\.)*[a-z0-9-]+\.([a-z0-9]{2,24})+(\.co\.([a-z0-9]{2,24})|\.([a-z0-9]{2,24}))*", url).group(0)
+    check = checklist(url)
+    if check is False:
+        await ctx.send(":x: **{0}** is not on our list.".format(url))
+    elif check is True:
+        await ctx.send(":white_check_mark: **{0}** is on our list.".format(url))
     else:
-        check = checklist(url)
-        if check is False:
-            await ctx.send(":x: **{0}** is not on our list.".format(url))
-        elif check is True:
-            await ctx.send(":white_check_mark: **{0}** is on our list.".format(url))
-        else:
-            await ctx.send("Error with your request - {0}".format(check))
+        await ctx.send("Error with your request - {0}".format(check))
 
 
-@bot.command(description="Check the status of a GitHub issue", help="Check the status of a GitHub issue")
+@slash.slash(name="status", description="Check the status of a GitHub issue", guild_ids=guild_ids)
 async def status(ctx, num: int):
     code, status, title = checkissue(num)
     if code == 200:
-        await ctx.send("Issue #{0} ({1}) - Status: {2}".format(num, title, status))
+        if status == "open":
+            embed_status = "❌ Unreviewed (open)"
+            embed_color = 0xff0000
+        else:
+            embed_status = "✅ Reviewed (closed)"
+            embed_color = 0x00ff80
+        link = "https://github.com/StopModReposts/Illegal-Mod-Sites/issues/" + str(num)
+        embed=discord.Embed(title="Click here to view the issue", url=link, description="Here's the issue status you've requested.", color=embed_color)
+        embed.set_author(name="Issue status")
+        embed.add_field(name="Issue Number", value=num, inline=True)
+        embed.add_field(name="Status", value=embed_status, inline=True)
+        await ctx.send(embed=embed)
+    elif code == 404:
+        await ctx.send("This issue doesn't exist.")
     else:
         await ctx.send("Error with your request - Status code: {0}".format(code))
 
