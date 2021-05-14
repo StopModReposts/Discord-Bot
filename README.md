@@ -15,7 +15,7 @@ Official StopModReposts Discord bot.
 - `/status [issuenumber]` - Check the status of a GitHub issue
 
 ## Invite the bot
-INVITE: https://discord.com/oauth2/authorize?client_id=785933469531504690&scope=bot&permissions=261192
+INVITE: https://discord.com/api/oauth2/authorize?client_id=785933469531504690&permissions=8&scope=applications.commands%20bot
 Invites are set to private. For now, only the bot owner can add the bot to a server. If you'd like to have the bot on your server, write me on Discord (mectag#7884).
 
 ## Development
