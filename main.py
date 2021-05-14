@@ -13,7 +13,8 @@ import re
 description = "Official StopModReposts bot"
 bot = commands.Bot(command_prefix='/', description=description, intents=discord.Intents.all())
 slash = SlashCommand(bot, sync_commands=True)
-guild_ids = [785935453719101450, 463457129588850699]
+# 785935453719101450 TESTING
+guild_ids = [463457129588850699]
 
 
 import sentry_sdk
