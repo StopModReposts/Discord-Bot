@@ -1,8 +1,8 @@
 # StopModReposts Bot
-[![buddy pipeline](https://app.buddy.works/berrysauce-dev/discord-bot-1/pipelines/pipeline/297693/badge.svg?token=e27212f499fa0a767216789629b0cb9427c4b2d90d5faa501532330053a36cba "buddy pipeline")](https://app.buddy.works/berrysauce-dev/discord-bot-1/pipelines/pipeline/297693)
 ![Discord](https://img.shields.io/discord/463457129588850699?label=discord)
 ![GitHub release (latest by date)](https://img.shields.io/github/v/release/StopModReposts/Discord-Bot)
 ![Python version](https://img.shields.io/badge/python-3.7-blue)
+[![Better Uptime Badge](https://betteruptime.com/status-badges/v1/monitor/a2hk.svg)](https://betteruptime.com/?utm_source=status_badge)
 
 Official StopModReposts Discord bot.
 
