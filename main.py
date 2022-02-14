@@ -1,3 +1,4 @@
+# imported packages
 import discord
 from discord.ext import commands
 from discord_slash import SlashCommand
@@ -16,6 +17,7 @@ slash = SlashCommand(bot, sync_commands=True)
 # 785935453719101450 TESTING
 guild_ids = [463457129588850699]
 
+# gets dotenv file and gets the tokens
 load_dotenv()
 DISCORD_TOKEN = os.getenv("DISCORD_TOKEN")
 GITHUB_USER = "smr-bot"
@@ -30,11 +32,14 @@ sentry_sdk.init(
 # Bot functions
 def checklist(url):
     try:
+        # makes a request from https://api.stopmodreposts.org/sites.txt
         r = requests.get('https://api.stopmodreposts.org/sites.txt')
     except:
+        # does an exception if it fails
         errormsg = "REQUEST FAILED"
         return errormsg
-
+    
+    # gets status_code
     if r.status_code == 200:
         if url in r.text:
             return True
@@ -43,13 +48,15 @@ def checklist(url):
     else:
         errormsg = "REQUEST FAILED WITH STATUS CODE " + str(r.status_code)
         return errormsg
-
+    
+    # generated the github issue
 def createissue(title, body=None, labels=None):
     '''Create an issue on github.com using the given parameters.'''
+    # issue api
     url = 'https://api.github.com/repos/StopModReposts/Illegal-Mod-Sites/issues'
     session = requests.Session()
     session.auth = (GITHUB_USER, GITHUB_TOKEN)
-    # Create our issue
+    # Create our issue title,body,labels
     issue = {'title': title,
              'body': body,
              'labels': labels}
@@ -63,6 +70,7 @@ def createissue(title, body=None, labels=None):
         return 0
 
 def checkissue(num):
+    # add new issue number by +1 so it dosen't create the same issue number
     url = 'https://api.github.com/repos/StopModReposts/Illegal-Mod-Sites/issues/{0}'.format(num)
     r = requests.get(url)
 
@@ -77,7 +85,7 @@ def checkissue(num):
 @bot.event
 async def on_ready():
   guild_count = 0
-  
+# gets discord username and username
   print("Logged in as")
   print(bot.user.name)
   print(bot.user.id)
@@ -91,12 +99,13 @@ async def on_ready():
   
   print("Bot is in " + str(guild_count) + " guilds")
     
-
+# dev command
 @slash.slash(name="ping", description="Test command which returns the bot's ping", guild_ids=guild_ids)
 async def ping(ctx):
   await ctx.send("Pong! Bot latency: {0}".format(bot.latency))
     
 
+    # embeds
 @slash.slash(name="submit", description="Submit a URL for review", guild_ids=guild_ids)
 async def submit(ctx, url: str, description: str):
     url = re.search("([a-z0-9A-Z]\.)*[a-z0-9-]+\.([a-z0-9]{2,24})+(\.co\.([a-z0-9]{2,24})|\.([a-z0-9]{2,24}))*", url).group(0)
