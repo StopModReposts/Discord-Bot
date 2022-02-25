@@ -353,9 +353,11 @@ async def kick(ctx, member: discord.Member, *, reason=None):
     await ctx.send(f"{member} was kicked!")
 
 #welcome user
-@bot.command()
-async def hi(ctx, member):
-    await ctx.send(f"Hello! {member} thank you for joining StopModReposts discord sever you joining means so mutch to us")
+@bot.event
+async def on_member_join(member):
+    guild = bot.get_guild(463457129588850699) 
+    channel = guild.get_channel(783751248989913139)
+    await channel.send(f'Hello {user.mention} and welcome to StopModReposts Discord sever you joining means so mutch us! :partying_face:')
 
 #unban user
 @slash.slash(name="unbans", description="unbans people who had gotten baned before", guild_ids=guild_ids)
