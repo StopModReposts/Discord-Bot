@@ -5,6 +5,7 @@ from dotenv import load_dotenv
 
 # to do :
 # multi ban
+#cogs
 
 # Basic setup
 description = "Official StopModReposts bot"
