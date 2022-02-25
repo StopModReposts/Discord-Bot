@@ -355,7 +355,7 @@ async def kick(ctx, member: discord.Member, *, reason=None):
 #welcome user
 @bot.command()
 async def hi(ctx, member):
-    await ctx.send(f"Hello! {member} thank you for joining our discord sever you joining means so mutch to us")
+    await ctx.send(f"Hello! {member} thank you for joining StopModReposts discord sever you joining means so mutch to us")
 
 #unban user
 @slash.slash(name="unbans", description="unbans people who had gotten baned before", guild_ids=guild_ids)
