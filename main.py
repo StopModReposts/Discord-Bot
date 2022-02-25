@@ -1,13 +1,11 @@
-import discord
+import discord, os, requests, json, sentry_sdk, json, re
 from discord.ext import commands
 from discord_slash import SlashCommand
 from dotenv import load_dotenv
-import os
-import requests
-import json
-import sentry_sdk
-import re
 
+# to do :
+# add a warn system
+# multi ban
 
 # Basic setup
 description = "Official StopModReposts bot"
@@ -15,6 +13,116 @@ bot = commands.Bot(command_prefix='/', description=description, intents=discord.
 slash = SlashCommand(bot, sync_commands=True)
 # 785935453719101450 TESTING
 guild_ids = [463457129588850699]
+
+if os.path.exists(os.getcwd() + "/config.json"):
+    
+    with open("./config.json") as f:
+        configData = json.load(f)
+
+else:
+    configTemplate = {"bannedWords": []}
+
+    with open(os.getcwd() + "/config.json", "w+") as f:
+        json.dump(configTemplate, f) 
+
+
+#level  system
+@bot.event
+async def on_member_join(member):
+    with open('levels.json', 'r') as f:
+        users = json.load(f)
+
+    #wip
+
+    await update_data(users, member)
+
+    with open('levels.json', 'w') as f:
+        json.dump(users, f)
+
+@bot.event
+async def on_message(message):
+    with open('levels.json', 'r') as f:
+        users = json.load(f)
+
+        await update_data(users, message.author)
+        await add_experience(users, message.author , 5)
+        await level_up(users, message.author, message.channel)
+
+    with open('levels.json' , 'r') as f:
+        json.dump(users, f)
+
+async def update_data(users, user):
+    if not user.id in users:
+        users[user.id] = {}
+        users[user.id]['experience'] = 0
+        users[user.id]['level'] = 1
+
+async def add_experience(users, user, exp):
+    users[user.id]['experience'] += exp
+
+async def level_up(users, user , channel):
+    experience = users[user.id]['experience']
+    lvl_start = users[user.id]['level']
+    lvl_end = int(experience ** (1/4))
+
+    if lvl_start < lvl_end:
+        await client.send_message(channel, '{} has leveled up to level {}'.format(user.mention, lvl_end))
+        users[user.id]['level'] = lvl_end
+
+
+# banned words [wip]
+
+@slash.slash(name="addbannedwords", description="addbannedwords", guild_ids=guild_ids)
+@commands.has_permissions(administrator=True)
+async def addbannedword(ctx, word):
+    if word.lower() in bannedWords:
+        await ctx.send("Already banned")
+    else:
+        bannedWords.append(word.lower())
+
+        with open("./config.json", "r+") as f:
+            data = json.load(f)
+            data["bannedWords"] = bannedWords
+            f.seek(0)
+            f.write(json.dumps(data))
+            f.truncate()
+
+        await ctx.message.delete()
+        await ctx.send("Word added to banned words.")
+    
+@slash.slash(name="removewords", description="remove word from banned list", guild_ids=guild_ids)
+@commands.has_permissions(administrator=True)
+async def removebannedword(ctx, word):
+    if word.lower() in bannedWords:
+        bannedWords.remove(word.lower())
+
+        with open("./config.json", "r+") as f:
+            data = json.load(f)
+            data["bannedWords"] = bannedWords
+            f.seek(0)
+            f.write(json.dumps(data))
+            f.truncate()
+
+        await ctx.message.delete()
+        await ctx.send("Word remove from banned words.")
+    else:
+        await ctx.send("Word isn't banned.")
+
+def msg_contains_word(msg, word):
+    return re.search(fr'\b({word})\b', msg) is not None
+
+
+@bot.event
+async def on_message(message):
+    messageAuthor = message.author
+
+    if bannedWords != None and (isinstance(message.channel, discord.channel.DMChannel) == False):
+        for bannedWord in bannedWords:
+            if msg_contains_word(message.content.lower(), bannedWord):
+                await message.delete()
+                await message.channel.send(f"{messageAuthor.mention} your message was removed as it contained a banned word.")
+
+    await bot.process_commands(message)
 
 load_dotenv()
 DISCORD_TOKEN = os.getenv("DISCORD_TOKEN")
@@ -152,6 +260,39 @@ async def status(ctx, num: int):
         await ctx.send("This issue doesn't exist.")
     else:
         await ctx.send("Error with your request - Status code: {0}".format(code))
+#ban
+@slash.slash(name="ban", description="bans people", guild_ids=guild_ids)
+@commands.has_permissions(ban_members=True)
+async def ban(ctx, member: discord.member, *, reason=None):
+    await member.ban(reason =reason)
+    await ctx.send(f"{member} got banned ")
+
+
+@slash.slash(name="kick", description="kicks people", guild_ids=guild_ids)
+@commands.has_permissions(kick_members=True)
+async def kick(ctx, member: discord.Member, *, reason=None):
+    await member.kick(reason=reason)
+    await ctx.send(f"{member} was kicked!")
+
+#welcome user
+@bot.command()
+async def hi(ctx, member):
+    await ctx.send(f"Hello! {member} thank you for joining our discord sever you joining means so mutch to us")
+
+#unban user
+@slash.slash(name="unbans", description="unbans people who had gotten baned before", guild_ids=guild_ids)
+@commands.has_permissions(ban_members=True)
+async def unban(ctx, *, member):
+    bannedUsers = await ctx.guild.bans()
+    name, discriminator = member.split("#")
+
+    for ban in bannedUsers:
+        user = ban.user
+
+        if(user.name, user.discriminator) == (name, discriminator):
+            await ctx.guild.unban(user)
+            await ctx.send(f"{user.mention} was unbanned.")
+            return
 
 
 # Run bot
