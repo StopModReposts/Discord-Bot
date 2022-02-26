@@ -1,11 +1,4 @@
-"""
-This is compressed into one file.
-"""
-
-import asyncio
-import youtube_dl
-import pafy
-import discord
+import asyncio, youtube_dl, pafy, discord
 from discord.ext import commands
 
 intents = discord.Intents.default()
