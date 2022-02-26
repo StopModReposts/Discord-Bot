@@ -1,11 +1,45 @@
-import discord, os, requests, json, sentry_sdk, json, re
+import discord, os, requests, json, sentry_sdk, json, re, time, asyncio
 from discord.ext import commands
 from discord_slash import SlashCommand
 from dotenv import load_dotenv
 
 # to do :
 # multi ban
+#cogs[wip]
+
+
+
 #cogs
+@bot.command()
+async def load(ctx, extention):
+    client.load_extention(f'cogs.{extention}')
+
+@bot.command()
+async def load(ctx, extention):
+    client.unload_extention(f'cogs.{extention}')
+
+for filename in os.lisrdir('./cogs'):
+    if filename.endswith('.py'):
+        client.load_extention(f'cogs.{filename[:-3]}')
+
+#logging
+async def update_stats():
+    await client.wait_until_ready()
+    global messages, joined
+
+    while not client.is_closed():
+        try:
+            with open("stats.txt", "a") as f:
+                f.write(f"Time: {int(time.time())}, Messages: {messages}, Members Joined: {joined}\n")
+
+            messages = 0
+            joined = 0
+
+            await asyncio.sleep(5)
+        except Exception as e:
+            print(e)
+            await asyncio.sleep(5)
+
 
 # Basic setup
 description = "Official StopModReposts bot"
@@ -375,6 +409,8 @@ async def unban(ctx, *, member):
             await ctx.send(f"{user.mention} was unbanned.")
             return
 
+
+bot.loop.create_task(update_stats())
 
 # Run bot
 bot.run(DISCORD_TOKEN)
