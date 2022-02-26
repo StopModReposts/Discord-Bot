@@ -197,5 +197,3 @@ class Player(commands.Cog):
 async def setup():
     await bot.wait_until_ready()
     bot.add_cog(Player(bot))
-
-bot.loop.create_task(setup())
