@@ -330,7 +330,7 @@ embed.add_field(name="What we do", value="We do our best to provide you with up-
 embed.add_field(name="Block bad sites", value="Don't want to accidentally visit one? Download our browser extension to be safe!", inline=True)
 embed.add_field(name="Maintain a list", value="We submit new sites periodically. Want to help other users? Find and upload sites so others won't download from them.", inline=True)
 embed.add_field(name="Open Source on GitHub", value="You can visit our GitHub repository to view the site lists. Also, we're always happy about a star!", inline=True)
-embed.set_footer(text="Join our discord sever")
+embed.set_footer(text="Join our discord sever:https://discord.gg/Pd9eMVzEYwdiscord")
 await ctx.send(embed=embed)
 
 @slash.slash(name="submit", description="Submit a URL for review", guild_ids=guild_ids)
