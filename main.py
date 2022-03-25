@@ -317,6 +317,21 @@ async def on_ready():
 async def ping(ctx):
   await ctx.send("Pong! Bot latency: {0}".format(bot.latency))
     
+@slash.slash(name="whyrepostingisbad", description="Test command which returns the bot's ping", guild_ids=guild_ids)
+async def whyrepostingisbad(ctx):
+embed=discord.Embed(title="Why reposting i bad", url="https://stopmodreposts.org/assets/img/ZoI2D6yH_400x400.png")
+embed.set_author(name="Berrysauce", url="https://stopmodreposts.org/assets/img/ZoI2D6yH_400x400.png", icon_url="https://stopmodreposts.org/assets/img/ZoI2D6yH_400x400.png")
+embed.set_thumbnail(url="https://stopmodreposts.org/assets/img/ZoI2D6yH_400x400.png")
+embed.add_field(name="What is reposting?", value="Reposting describes the uncredited re-uploading of (mostly copyrighted) files without the permission of the author. Reposting is one of the worst things a mod author can go through, and here is why:", inline=True)
+embed.add_field(name="Malicious software", value="If a mod gets reposted, the mod author doesn't have any control over the files on the reposting site. This means that malware/adware could get on your computer when downloading/using the mod.", inline=True)
+embed.add_field(name="No income for Developers", value="Developers live from income. If you download from reposting sites, they won't get any revenue, which could mean less mods from them in the future.", inline=True)
+embed.add_field(name="Outdated versions", value="Reposting sites might link you to outdated versions, which could mean more bugs, crashes and errors for you.", inline=True)
+embed.add_field(name="What we do", value="We do our best to provide you with up-to date site lists, a browser extension to block sites, and more.", inline=True)
+embed.add_field(name="Block bad sites", value="Don't want to accidentally visit one? Download our browser extension to be safe!", inline=True)
+embed.add_field(name="Maintain a list", value="We submit new sites periodically. Want to help other users? Find and upload sites so others won't download from them.", inline=True)
+embed.add_field(name="Open Source on GitHub", value="You can visit our GitHub repository to view the site lists. Also, we're always happy about a star!", inline=True)
+embed.set_footer(text="Join our discord sever")
+await ctx.send(embed=embed)
 
 @slash.slash(name="submit", description="Submit a URL for review", guild_ids=guild_ids)
 async def submit(ctx, url: str, description: str):
