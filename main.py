@@ -25,10 +25,6 @@ def checklist(url):
     else:
         return False
 
-@tree.command(name="sample", description="Example command")
-async def sample(interaction: discord.Interaction):
-    await interaction.response.send_message("Hello!")
-
 @tree.command(name="check", description="Check if a site is listed")
 async def check(interaction: discord.Interaction, url: str):
     url = re.search("([a-z0-9A-Z]\.)*[a-z0-9-]+\.([a-z0-9]{2,24})+(\.co\.([a-z0-9]{2,24})|\.([a-z0-9]{2,24}))*",
