@@ -1,14 +1,14 @@
+import os
+import json
+import requests
 import discord
 from discord import app_commands
 from dotenv import load_dotenv
-import os
-import requests
-import re
-import json
+from yarl import URL
 
 load_dotenv()
 DISCORD_TOKEN = os.getenv("DISCORD_TOKEN")
-SMR_GUILD_ID = "463457129588850699"
+SMR_GUILD_ID = 463457129588850699
 client = discord.Client(application_id="785933469531504690", intents=discord.Intents.all())
 tree = app_commands.CommandTree(client)
 
@@ -27,8 +27,7 @@ def checklist(url):
 
 @tree.command(name="check", description="Check if a site is listed")
 async def check(interaction: discord.Interaction, url: str):
-    url = re.search("([a-z0-9A-Z]\.)*[a-z0-9-]+\.([a-z0-9]{2,24})+(\.co\.([a-z0-9]{2,24})|\.([a-z0-9]{2,24}))*",
-                    url).group(0)
+    url = URL(url).host.replace("http://", "").replace("https://", "").replace("www.", "")
 
     # List status
     list_status = checklist(url)
@@ -41,10 +40,10 @@ async def check(interaction: discord.Interaction, url: str):
 
 @tree.command(name="submit", description="Submit a site for review")
 async def submit(interaction: discord.Interaction, url: str, description: str):
-    url = re.search("([a-z0-9A-Z]\.)*[a-z0-9-]+\.([a-z0-9]{2,24})+(\.co\.([a-z0-9]{2,24})|\.([a-z0-9]{2,24}))*",
-                    url).group(0)
+    url = URL(url).host.replace("http://", "").replace("https://", "").replace("www.", "")
+
     data = {
-        "domain": str(url),
+        "domain": url,
         "description": f"VIA DC - {description}"
     }
 
@@ -64,7 +63,7 @@ async def submit(interaction: discord.Interaction, url: str, description: str):
 
 async def main():
     async with client:
-      await tree.sync()
+      await tree.sync(guild=SMR_GUILD_ID)
       await client.start(DISCORD_TOKEN)
 
 client.run(DISCORD_TOKEN)
